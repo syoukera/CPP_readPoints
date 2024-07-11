@@ -82,12 +82,12 @@ int main() {
     vector<vector<float>> gridU(GridSize, vector<float>(GridSize, 0.0f));
 
     // "points"ファイルからデータを読み込む
-    if (!readDataFromFile("points.txt", pointsData)) {
+    if (!readDataFromFile("points", pointsData)) {
         return 1;
     }
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile("U.txt", uData)) {
+    if (!readDataFromFile("U", uData)) {
         return 1;
     }
 
