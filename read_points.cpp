@@ -8,7 +8,7 @@ using namespace std;
 
 // データポイントの構造体
 struct DataPoint {
-    float x, y, z;
+    double x, y, z;
 };
 
 // ファイルからデータを読み込む関数
@@ -21,7 +21,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 
     int num_points;
     string line;
-    float x, y, z;
+    double x, y, z;
 
     // 最初の行をスキップ（ファイルフォーマットによる）
     getline(infile, line);
@@ -35,7 +35,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
         getline(infile, line); // 1行読み取り
 
         // sscanfで解析
-        if (sscanf(line.c_str(), "(%f %f %f)", &x, &y, &z) == 3) {
+        if (sscanf(line.c_str(), "(%le %le %le)", &x, &y, &z) == 3) {
             data.push_back({x, y, z});
         } else {
             cerr << "行 " << i+2 << " : 解析エラー" << endl; // 行数は1から始まるため、インデックスに+2を指定
@@ -48,19 +48,19 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 }
 
 // 最も近い点の値を補間する関数
-void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, float gridSpacing, vector<vector<DataPoint>>& gridU, int GridSize) {
+void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, double gridSpacing, vector<vector<DataPoint>>& gridU, int GridSize) {
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
             // 格子点の座標を計算
-            float gridX = i * gridSpacing;
-            float gridY = j * gridSpacing;
+            double gridX = i * gridSpacing;
+            double gridY = j * gridSpacing;
 
             // 最も近いデータ点を見つける
-            float minDist = numeric_limits<float>::max();
+            double minDist = numeric_limits<double>::max();
             DataPoint nearestU = {0.0f, 0.0f, 0.0f}; // デフォルトの初期値
 
             for (size_t k = 0; k < points.size(); ++k) {
-                float dist = sqrt(pow(points[k].x - gridX, 2) + pow(points[k].y - gridY, 2));
+                double dist = sqrt(pow(points[k].x - gridX, 2) + pow(points[k].y - gridY, 2));
                 if (dist < minDist) {
                     minDist = dist;
                     nearestU = uData[k]; // pointsと同じインデックスのuDataの値を取得
@@ -75,7 +75,7 @@ void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<Da
 
 int main() {
     // グリッドの間隔
-    const float gridSpacing = 1.0 / 100.0;
+    const double gridSpacing = 1.0 / 100.0;
     const int GridSize = 101;
 
     vector<DataPoint> pointsData, uData;
