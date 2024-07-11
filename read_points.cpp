@@ -76,22 +76,26 @@ bool writeDataToFile(const string& filename, vector<vector<DataPoint>>& gridData
 }
 
 // 最も近い点の値を補間する関数
-void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, double gridSpacing, vector<vector<DataPoint>>& gridU, int GridSize) {
-    for (int i = 0; i < GridSize; ++i) {
-        for (int j = 0; j < GridSize; ++j) {
-            // 格子点の座標を計算
-            double gridX = i * gridSpacing;
-            double gridY = j * gridSpacing;
+void interpolateNearestNeighbor(const vector<DataPoint>& refPoints, const vector<DataPoint>& refU, vector<vector<DataPoint>>& gridPoints, vector<vector<DataPoint>>& gridU) {
+    
+    for (size_t i = 0; i < gridPoints.size(); ++i) {
+        for (size_t j = 0; j < gridPoints[i].size(); ++j) {
 
+            // 格子点の座標を取得
+            double gridX = gridPoints[i][j].x;
+            double gridY = gridPoints[i][j].y;
+            double gridZ = gridPoints[i][j].z;
+
+            
             // 最も近いデータ点を見つける
             double minDist = numeric_limits<double>::max();
             DataPoint nearestU = {0.0f, 0.0f, 0.0f}; // デフォルトの初期値
 
-            for (size_t k = 0; k < points.size(); ++k) {
-                double dist = sqrt(pow(points[k].x - gridX, 2) + pow(points[k].y - gridY, 2));
+            for (size_t k = 0; k < refPoints.size(); ++k) {
+                double dist = sqrt(pow(refPoints[k].x - gridX, 2) + pow(refPoints[k].y - gridY, 2) + pow(refPoints[k].z - gridZ, 2));
                 if (dist < minDist) {
                     minDist = dist;
-                    nearestU = uData[k]; // pointsと同じインデックスのuDataの値を取得
+                    nearestU = refU[k]; // pointsと同じインデックスのuDataの値を取得
                 }
             }
 
@@ -137,9 +141,14 @@ int main() {
     }
 
     // 最も近い点の値を補間する
-    interpolateNearestNeighbor(pointsData, uData, gridSpacing, gridU, GridSize);
+    interpolateNearestNeighbor(pointsData, uData, gridPoints, gridU);
 
-    // "points"ファイルからデータを読み込む
+    // gridPointsをファイルに書き込む
+    if (!writeDataToFile("output/X_interpolated", gridPoints, numPoints, GridSize)) {
+        return 1;
+    }
+
+    // gridUをファイルに書き込む
     if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
         return 1;
     }
