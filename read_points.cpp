@@ -133,6 +133,11 @@ int main() {
             double gridY = j * gridSpacing;
             double gridZ = 0.0;
 
+            // convert range from [0, 1] to [-0.0005, 0.0005]
+            gridX = (gridX - 0.5)*0.001;
+            gridY = (gridY - 0.5)*0.001;
+            gridZ = (gridZ - 0.5)*0.001;
+
             DataPoint point = {gridX, gridY, gridZ};
 
             // 格子点に最も近いデータ点の値を代入
