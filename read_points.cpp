@@ -47,6 +47,34 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
     return true;
 }
 
+// ファイルにデータを書き込む関数
+bool writeDataToFile(const string& filename, vector<vector<DataPoint>>& gridData, int numPoints, int GridSize) {
+    
+    // 補間したデータをスペース区切りでテキストファイルに出力
+    ofstream outfile(filename);
+    if (!outfile) {
+        cerr << "出力ファイルを開けませんでした。" << endl;
+        return false;
+    }
+
+    outfile << endl;
+    outfile << numPoints << endl;
+    outfile << "(" << endl;
+    
+    for (int i = 0; i < GridSize; ++i) {
+        for (int j = 0; j < GridSize; ++j) {
+            outfile << "(" << gridData[i][j].x << " " << gridData[i][j].y << " " << gridData[i][j].z << ")" << endl; 
+            // if (j < GridSize - 1) outfile << " "; // 各行の最後にスペースを追加しない
+        }
+    }
+
+    outfile << ")" << endl;
+    
+    // ファイルを閉じる
+    outfile.close();
+    return true;
+}
+
 // 最も近い点の値を補間する関数
 void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, double gridSpacing, vector<vector<DataPoint>>& gridU, int GridSize) {
     for (int i = 0; i < GridSize; ++i) {
@@ -95,33 +123,10 @@ int main() {
     // 最も近い点の値を補間する
     interpolateNearestNeighbor(pointsData, uData, gridSpacing, gridU, GridSize);
 
-    // // 補間したデータの出力（例として、gridUの値を出力）
-    // for (int i = 0; i < GridSize; ++i) {
-    //     for (int j = 0; j < GridSize; ++j) {
-    //         cout << "Grid Point (" << i * gridSpacing << ", " << j * gridSpacing << ") Value: ("
-    //              << gridU[i][j].x << ", " << gridU[i][j].y << ", " << gridU[i][j].z << ")" << endl;
-    //     }
-    // }
-    
-    // 補間したデータをスペース区切りでテキストファイルに出力
-    ofstream outfile("output/U_interpolated");
-    if (!outfile) {
-        cerr << "出力ファイルを開けませんでした。" << endl;
+    // "points"ファイルからデータを読み込む
+    if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
         return 1;
     }
-
-    outfile << endl;
-    outfile << numPoints << endl;
-    outfile << "(" << endl;
     
-    for (int i = 0; i < GridSize; ++i) {
-        for (int j = 0; j < GridSize; ++j) {
-            outfile << "(" << gridU[i][j].x << " " << gridU[i][j].y << " " << gridU[i][j].z << ")" << endl; 
-            // if (j < GridSize - 1) outfile << " "; // 各行の最後にスペースを追加しない
-        }
-    }
-
-    outfile << ")" << endl;
-
     return 0;
 }
