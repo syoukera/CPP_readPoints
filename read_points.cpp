@@ -48,7 +48,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 }
 
 // 最も近い点の値を補間する関数
-void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, float gridSpacing, int GridSize, vector<vector<float>>& gridU) {
+void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, float gridSpacing, vector<vector<DataPoint>>& gridU, int GridSize) {
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
             // 格子点の座標を計算
@@ -57,13 +57,13 @@ void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<Da
 
             // 最も近いデータ点を見つける
             float minDist = numeric_limits<float>::max();
-            float nearestU = 0.0f; // デフォルトの初期値（例えば0）
+            DataPoint nearestU = {0.0f, 0.0f, 0.0f}; // デフォルトの初期値
 
-            for (const auto& dp : points) {
-                float dist = sqrt(pow(dp.x - gridX, 2) + pow(dp.y - gridY, 2));
+            for (size_t k = 0; k < points.size(); ++k) {
+                float dist = sqrt(pow(points[k].x - gridX, 2) + pow(points[k].y - gridY, 2));
                 if (dist < minDist) {
                     minDist = dist;
-                    nearestU = dp.z; // pointsと同じインデックスのuDataのzを取得
+                    nearestU = uData[k]; // pointsと同じインデックスのuDataの値を取得
                 }
             }
 
@@ -79,7 +79,7 @@ int main() {
     const int GridSize = 101;
 
     vector<DataPoint> pointsData, uData;
-    vector<vector<float>> gridU(GridSize, vector<float>(GridSize, 0.0f));
+    vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
     // "points"ファイルからデータを読み込む
     if (!readDataFromFile("data/points", pointsData)) {
@@ -92,12 +92,13 @@ int main() {
     }
 
     // 最も近い点の値を補間する
-    interpolateNearestNeighbor(pointsData, uData, gridSpacing, GridSize, gridU);
+    interpolateNearestNeighbor(pointsData, uData, gridSpacing, gridU, GridSize);
 
     // 補間したデータの出力（例として、gridUの値を出力）
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
-            cout << "Grid Point (" << i * gridSpacing << ", " << j * gridSpacing << ") Value: " << gridU[i][j] << endl;
+            cout << "Grid Point (" << i * gridSpacing << ", " << j * gridSpacing << ") Value: ("
+                 << gridU[i][j].x << ", " << gridU[i][j].y << ", " << gridU[i][j].z << ")" << endl;
         }
     }
 
