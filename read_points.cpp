@@ -77,6 +77,7 @@ int main() {
     // グリッドの間隔
     const double gridSpacing = 1.0 / 100.0;
     const int GridSize = 101;
+    const int numPoints = GridSize*GridSize;
 
     vector<DataPoint> pointsData, uData;
     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
@@ -94,13 +95,33 @@ int main() {
     // 最も近い点の値を補間する
     interpolateNearestNeighbor(pointsData, uData, gridSpacing, gridU, GridSize);
 
-    // 補間したデータの出力（例として、gridUの値を出力）
+    // // 補間したデータの出力（例として、gridUの値を出力）
+    // for (int i = 0; i < GridSize; ++i) {
+    //     for (int j = 0; j < GridSize; ++j) {
+    //         cout << "Grid Point (" << i * gridSpacing << ", " << j * gridSpacing << ") Value: ("
+    //              << gridU[i][j].x << ", " << gridU[i][j].y << ", " << gridU[i][j].z << ")" << endl;
+    //     }
+    // }
+    
+    // 補間したデータをスペース区切りでテキストファイルに出力
+    ofstream outfile("output/U_interpolated");
+    if (!outfile) {
+        cerr << "出力ファイルを開けませんでした。" << endl;
+        return 1;
+    }
+
+    outfile << endl;
+    outfile << numPoints << endl;
+    outfile << "(" << endl;
+    
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
-            cout << "Grid Point (" << i * gridSpacing << ", " << j * gridSpacing << ") Value: ("
-                 << gridU[i][j].x << ", " << gridU[i][j].y << ", " << gridU[i][j].z << ")" << endl;
+            outfile << "(" << gridU[i][j].x << " " << gridU[i][j].y << " " << gridU[i][j].z << ")" << endl; 
+            // if (j < GridSize - 1) outfile << " "; // 各行の最後にスペースを追加しない
         }
     }
+
+    outfile << ")" << endl;
 
     return 0;
 }
