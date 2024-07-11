@@ -48,7 +48,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 }
 
 // 最も近い点の値を補間する関数
-void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, float gridSpacing, vector<vector<float>>& gridU) {
+void interpolateNearestNeighbor(const vector<DataPoint>& points, const vector<DataPoint>& uData, float gridSpacing, int GridSize, vector<vector<float>>& gridU) {
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
             // 格子点の座標を計算
@@ -82,17 +82,17 @@ int main() {
     vector<vector<float>> gridU(GridSize, vector<float>(GridSize, 0.0f));
 
     // "points"ファイルからデータを読み込む
-    if (!readDataFromFile("points", pointsData)) {
+    if (!readDataFromFile("data/points", pointsData)) {
         return 1;
     }
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile("U", uData)) {
+    if (!readDataFromFile("data/U", uData)) {
         return 1;
     }
 
     // 最も近い点の値を補間する
-    interpolateNearestNeighbor(pointsData, uData, gridSpacing, gridU);
+    interpolateNearestNeighbor(pointsData, uData, gridSpacing, GridSize, gridU);
 
     // 補間したデータの出力（例として、gridUの値を出力）
     for (int i = 0; i < GridSize; ++i) {
