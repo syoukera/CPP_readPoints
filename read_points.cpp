@@ -108,6 +108,7 @@ int main() {
     const int numPoints = GridSize*GridSize;
 
     vector<DataPoint> pointsData, uData;
+    vector<vector<DataPoint>> gridPoints(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
     // "points"ファイルからデータを読み込む
@@ -118,6 +119,21 @@ int main() {
     // "U"ファイルからデータを読み込む
     if (!readDataFromFile("data/U", uData)) {
         return 1;
+    }
+
+    // 格子点のXYZ座標を計算
+    for (int i = 0; i < GridSize; ++i) {
+        for (int j = 0; j < GridSize; ++j) {
+            // 格子点の座標を計算
+            double gridX = i * gridSpacing;
+            double gridY = j * gridSpacing;
+            double gridZ = 0.0;
+
+            DataPoint point = {gridX, gridY, gridZ};
+
+            // 格子点に最も近いデータ点の値を代入
+            gridPoints[i][j] = point;
+        }
     }
 
     // 最も近い点の値を補間する
