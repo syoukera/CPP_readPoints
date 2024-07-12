@@ -5,8 +5,11 @@
 
 using namespace std;
 
+
 // バイリニア補間を行う関数
-DataPoint bilinearInterpolation(double gridX, double gridY, const vector<DataPoint>& points, const vector<DataPoint>& uData) {
+DataPoint bilinearInterpolation(double gridX, double gridY, 
+                                const vector<DataPoint>& points, 
+                                const vector<DataPoint>& uData) {
 
     // bool foundU1 = false, foundU2 = false, foundU3 = false, foundU4 = false;
     vector<bool> foundU(4, false);

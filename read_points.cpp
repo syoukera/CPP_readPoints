@@ -5,7 +5,9 @@
 #include <cmath>
 #include <limits>
 #include "data_point.h"
+#include "index_point.h"
 #include "writeData.h"
+#include "neighborIndex.h"
 #include "interpolate.h"
 using namespace std;
 
@@ -84,9 +86,14 @@ int main() {
             gridPoints[i][j] = point;
         }
     }
+
+    vector<vector<vector<bool>>> foundU(GridSize, vector<vector<bool>>(GridSize, vector<bool>(4, false))); // 象限ごとに点が見つかったかどうかのbool値
+    vector<vector<IndexPoint>> neighborIndex(GridSize, vector<IndexPoint>(GridSize, {0, 0, 0, 0})); // 象限ごとの近傍の点のインデックス
+
+    findNeighborIndexGrid(gridPoints, pointsData, neighborIndex, foundU);
     
-    // バイリニア補間を実行する
-    interpolateBilinear(pointsData, uData, gridPoints, gridU);
+    // // バイリニア補間を実行する
+    // interpolateBilinear(pointsData, uData, gridPoints, gridU);
 
 
     // // 最も近い点の値を補間する
