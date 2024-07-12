@@ -65,6 +65,30 @@ int main() {
         return 1;
     }
 
+    // cout << pointsData[0].x << " " << pointsData[0].y << " " << pointsData[0].z << endl;
+    // cout << pointsData[1].x << " " << pointsData[1].y << " " << pointsData[1].z << endl;
+    // cout << pointsData[2].x << " " << pointsData[2].y << " " << pointsData[2].z << endl;
+    // cout << pointsData[3].x << " " << pointsData[3].y << " " << pointsData[3].z << endl;
+    // cout << pointsData[4].x << " " << pointsData[4].y << " " << pointsData[4].z << endl;
+
+    // cout << uData[0].x << " " << uData[0].y << " " << uData[0].z << endl;
+    // cout << uData[1].x << " " << uData[1].y << " " << uData[1].z << endl;
+    // cout << uData[2].x << " " << uData[2].y << " " << uData[2].z << endl;
+    // cout << uData[3].x << " " << uData[3].y << " " << uData[3].z << endl;
+    // cout << uData[4].x << " " << uData[4].y << " " << uData[4].z << endl;
+
+    // 象限ごとに近傍のインデックスを取得する
+    vector<size_t> neigbhorIndex(4, 0);
+    double gridX = 2.0;
+    double gridY = 4.0;
+
+    findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex);
+    
+    cout << neigbhorIndex[0] << endl;
+    cout << neigbhorIndex[1] << endl;
+    cout << neigbhorIndex[2] << endl;
+    cout << neigbhorIndex[3] << endl;
+
     // 格子点のXYZ座標を計算
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
@@ -88,11 +112,6 @@ int main() {
     // バイリニア補間を実行する
     interpolateBilinear(pointsData, uData, gridPoints, gridU);
 
-    cout << pointsData[0].x << " " << pointsData[0].y << " " << pointsData[0].z << endl;
-    cout << pointsData[1].x << " " << pointsData[1].y << " " << pointsData[1].z << endl;
-    cout << pointsData[2].x << " " << pointsData[2].y << " " << pointsData[2].z << endl;
-    cout << pointsData[3].x << " " << pointsData[3].y << " " << pointsData[3].z << endl;
-    cout << pointsData[4].x << " " << pointsData[4].y << " " << pointsData[4].z << endl;
 
     // // 最も近い点の値を補間する
     // interpolateNearestNeighbor(pointsData, uData, gridPoints, gridU);
