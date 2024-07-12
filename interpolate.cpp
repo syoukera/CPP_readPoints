@@ -2,8 +2,81 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 using namespace std;
+
+void findNeighborIndex(double gridX, double gridY, 
+        const vector<DataPoint>& points, vector<size_t>& neighborIndex) {
+
+    vector<bool> foundU(4, false);
+    vector<double> minDist(4, numeric_limits<double>::max()); // 象限ごとの最小の距離
+    
+    for (size_t i = 0; i < points.size(); ++i) {
+        
+        double refX = points[i].x;
+        double refY = points[i].y;
+
+        // cout << refX << " " << refY << endl;
+        // cout << (refX >= gridX && refY >= gridY) << endl;
+
+        if (refX >= gridX && refY >= gridY) {
+            // 第1象限
+            size_t i_quad = 0;
+        
+            // グリッドとレファレンスの点の距離を計算
+            double dist = sqrt(pow(refX - gridX, 2) + pow(refY - gridY, 2));
+
+            // cout << (dist < minDist[i_quad]) << endl;
+
+            // より近傍の点であるかを判定して，距離と流速を保存
+            if (dist < minDist[i_quad]) {
+                minDist[i_quad] = dist;
+                neighborIndex[i_quad] = i;
+                foundU[i_quad] = true;
+            }
+        } else if (refX < gridX && refY >= gridY) {
+            // 第2象限
+            size_t i_quad = 1;
+        
+            // グリッドとレファレンスの点の距離を計算
+            double dist = sqrt(pow(refX - gridX, 2) + pow(refY - gridY, 2));
+
+            // より近傍の点であるかを判定して，距離と流速を保存
+            if (dist < minDist[i_quad]) {
+                minDist[i_quad] = dist;
+                neighborIndex[i_quad] = i;
+                foundU[i_quad] = true;
+            }
+        } else if (refX < gridX && refY < gridY) {
+            // 第3象限
+            size_t i_quad = 2;
+        
+            // グリッドとレファレンスの点の距離を計算
+            double dist = sqrt(pow(refX - gridX, 2) + pow(refY - gridY, 2));
+
+            // より近傍の点であるかを判定して，距離と流速を保存
+            if (dist < minDist[i_quad]) {
+                minDist[i_quad] = dist;
+                neighborIndex[i_quad] = i;
+                foundU[i_quad] = true;
+            }
+        } else if (refX >= gridX && refY < gridY) {
+            // 第4象限
+            size_t i_quad = 3;
+        
+            // グリッドとレファレンスの点の距離を計算
+            double dist = sqrt(pow(refX - gridX, 2) + pow(refY - gridY, 2));
+
+            // より近傍の点であるかを判定して，距離と流速を保存
+            if (dist < minDist[i_quad]) {
+                minDist[i_quad] = dist;
+                neighborIndex[i_quad] = i;
+                foundU[i_quad] = true;
+            }
+        }
+    }
+}
 
 // バイリニア補間を行う関数
 DataPoint bilinearInterpolation(double gridX, double gridY, const vector<DataPoint>& points, const vector<DataPoint>& uData) {

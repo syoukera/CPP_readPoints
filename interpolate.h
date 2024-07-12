@@ -5,6 +5,11 @@
 #include "data_point.h"
 
 // void interpolateBilinear(const std::vector<DataPoint>& points, const std::vector<DataPoint>& uData, float gridSpacing, std::vector<std::vector<DataPoint>>& gridU, int GridSize);
+
+void findNeighborIndex(double gridX, double gridY, 
+    const std::vector<DataPoint>& 
+    points, std::vector<std::size_t>& neighborIndex);
+
 DataPoint bilinearInterpolation(
     double gridX, double gridY, 
     const std::vector<DataPoint>& points, 
