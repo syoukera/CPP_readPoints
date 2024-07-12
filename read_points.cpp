@@ -29,14 +29,14 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
     infile.ignore(); // 改行を読み飛ばす
 
     // 各行を読み取り、sscanfで解析
-    for (int i = 0; i < num_points; ++i) {
-        getline(infile, line); // 1行読み取り
+
+    while (getline(infile, line)) {
 
         // sscanfで解析
         if (sscanf(line.c_str(), "(%le %le %le)", &x, &y, &z) == 3) {
             data.push_back({x, y, z});
         } else {
-            cerr << "行 " << i+2 << " : 解析エラー" << endl; // 行数は1から始まるため、インデックスに+2を指定
+            // cerr << " : 解析エラー" << endl;
         }
     }
 
@@ -56,12 +56,12 @@ int main() {
     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
     // "points"ファイルからデータを読み込む
-    if (!readDataFromFile("data/points", pointsData)) {
+    if (!readDataFromFile("data/points_4", pointsData)) {
         return 1;
     }
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile("data/U", uData)) {
+    if (!readDataFromFile("data/U_4", uData)) {
         return 1;
     }
 
@@ -88,6 +88,11 @@ int main() {
     // バイリニア補間を実行する
     interpolateBilinear(pointsData, uData, gridPoints, gridU);
 
+    cout << pointsData[0].x << " " << pointsData[0].y << " " << pointsData[0].z << endl;
+    cout << pointsData[1].x << " " << pointsData[1].y << " " << pointsData[1].z << endl;
+    cout << pointsData[2].x << " " << pointsData[2].y << " " << pointsData[2].z << endl;
+    cout << pointsData[3].x << " " << pointsData[3].y << " " << pointsData[3].z << endl;
+    cout << pointsData[4].x << " " << pointsData[4].y << " " << pointsData[4].z << endl;
 
     // // 最も近い点の値を補間する
     // interpolateNearestNeighbor(pointsData, uData, gridPoints, gridU);
@@ -97,10 +102,10 @@ int main() {
     //     return 1;
     // }
 
-    // gridUをファイルに書き込む
-    if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
-        return 1;
-    }
+    // // gridUをファイルに書き込む
+    // if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
+    //     return 1;
+    // }
     
     return 0;
 }
