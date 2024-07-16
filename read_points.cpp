@@ -84,10 +84,17 @@ int main() {
 
     findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex);
     
-    cout << neigbhorIndex[0] << endl;
-    cout << neigbhorIndex[1] << endl;
-    cout << neigbhorIndex[2] << endl;
-    cout << neigbhorIndex[3] << endl;
+    // cout << neigbhorIndex[0] << endl;
+    // cout << neigbhorIndex[1] << endl;
+    // cout << neigbhorIndex[2] << endl;
+    // cout << neigbhorIndex[3] << endl;
+
+    DataPoint interpolatedU;
+    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex);
+
+    cout << interpolatedU.x << endl;
+    cout << interpolatedU.y << endl;
+    cout << interpolatedU.z << endl;
 
     // 格子点のXYZ座標を計算
     for (int i = 0; i < GridSize; ++i) {
