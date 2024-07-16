@@ -50,6 +50,7 @@ int main() {
     const double gridSpacing = 1.0 / 100.0;
     const int GridSize = 101;
     const int numPoints = GridSize*GridSize;
+    const double inletRadious = 5.0e-4; // radious of inlet tube (5 mm)
 
     vector<DataPoint> pointsData, uData;
     vector<vector<DataPoint>> gridPoints(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
@@ -80,8 +81,8 @@ int main() {
     // 象限ごとに近傍のインデックスを取得する
     vector<size_t> neigbhorIndex(4, 0);
     vector<bool> foundU(4, false);
-    double gridX = -6.0e-4;
-    double gridY = 0.0;
+    double gridX = 0.0e-4;
+    double gridY = -6.0e-4;
 
     findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
     
@@ -96,7 +97,7 @@ int main() {
     cout << foundU[3] << endl;    
 
     DataPoint interpolatedU;
-    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU);
+    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
 
     cout << interpolatedU.x << endl;
     cout << interpolatedU.y << endl;
@@ -122,8 +123,8 @@ int main() {
         }
     }
     
-    // バイリニア補間を実行する
-    interpolateBilinear(pointsData, uData, gridPoints, gridU);
+    // // バイリニア補間を実行する
+    // interpolateBilinear(pointsData, uData, gridPoints, gridU);
 
 
     // // 最も近い点の値を補間する

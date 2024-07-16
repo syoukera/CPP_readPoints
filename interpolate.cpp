@@ -85,7 +85,18 @@ DataPoint interpolatePointBilinear(double gridX, double gridY,
     const std::vector<DataPoint>& points,
     const std::vector<DataPoint>& uData,
     std::vector<std::size_t>& neighborIndex,
-    std::vector<bool>& foundU) {
+    std::vector<bool>& foundU,
+    const double inletRadious) {
+
+    // calculate distance from origin
+    double distanceFromOrigin = sqrt(pow(gridX, 2.0) + pow(gridY, 2.0));
+
+    // check is inside of inlet tube
+    if (distanceFromOrigin > inletRadious) {
+        // return interpolated velocity as zero
+        DataPoint result = {0.0, 0.0, 0.0};
+        return result;
+    }
 
     // 象限のindexからバイリニアのインデックスが異なるので変換している
     // 格子点　points バイリニア:象限, 1:2, 2:3, 3:1, 4:0

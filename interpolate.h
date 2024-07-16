@@ -15,7 +15,8 @@ DataPoint interpolatePointBilinear(double gridX, double gridY,
     const std::vector<DataPoint>& points,
     const std::vector<DataPoint>& uData,
     std::vector<std::size_t>& neighborIndex,
-    std::vector<bool>& foundU);
+    std::vector<bool>& foundU,
+    const double inletRadious);
 
 DataPoint bilinearInterpolation(
     double gridX, double gridY, 
