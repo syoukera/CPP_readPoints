@@ -78,30 +78,30 @@ int main() {
     // cout << uData[3].x << " " << uData[3].y << " " << uData[3].z << endl;
     // cout << uData[4].x << " " << uData[4].y << " " << uData[4].z << endl;
 
-    // 象限ごとに近傍のインデックスを取得する
-    vector<size_t> neigbhorIndex(4, 0);
-    vector<bool> foundU(4, false);
-    double gridX = 0.0e-4;
-    double gridY = -6.0e-4;
+    // // 象限ごとに近傍のインデックスを取得する
+    // vector<size_t> neigbhorIndex(4, 0);
+    // vector<bool> foundU(4, false);
+    // double gridX = 0.0e-4;
+    // double gridY = -6.0e-4;
 
-    findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
+    // findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
     
     // cout << neigbhorIndex[0] << endl;
     // cout << neigbhorIndex[1] << endl;
     // cout << neigbhorIndex[2] << endl;
     // cout << neigbhorIndex[3] << endl;
 
-    cout << foundU[0] << endl;
-    cout << foundU[1] << endl;
-    cout << foundU[2] << endl;
-    cout << foundU[3] << endl;    
+    // cout << foundU[0] << endl;
+    // cout << foundU[1] << endl;
+    // cout << foundU[2] << endl;
+    // cout << foundU[3] << endl;    
 
-    DataPoint interpolatedU;
-    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
+    // DataPoint interpolatedU;
+    // interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
 
-    cout << interpolatedU.x << endl;
-    cout << interpolatedU.y << endl;
-    cout << interpolatedU.z << endl;
+    // cout << interpolatedU.x << endl;
+    // cout << interpolatedU.y << endl;
+    // cout << interpolatedU.z << endl;
 
     // 格子点のXYZ座標を計算
     for (int i = 0; i < GridSize; ++i) {
@@ -120,12 +120,19 @@ int main() {
 
             // 格子点に最も近いデータ点の値を代入
             gridPoints[i][j] = point;
+
+            // calclate neighbor index
+            vector<size_t> neigbhorIndex(4, 0);
+            vector<bool> foundU(4, false);
+            findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
+    
+            // calculate interpolatedU
+            gridU[i][j] = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
         }
     }
     
     // // バイリニア補間を実行する
     // interpolateBilinear(pointsData, uData, gridPoints, gridU);
-
 
     // // 最も近い点の値を補間する
     // interpolateNearestNeighbor(pointsData, uData, gridPoints, gridU);
@@ -135,10 +142,10 @@ int main() {
     //     return 1;
     // }
 
-    // // gridUをファイルに書き込む
-    // if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
-    //     return 1;
-    // }
+    // gridUをファイルに書き込む
+    if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
+        return 1;
+    }
     
     return 0;
 }
