@@ -56,12 +56,12 @@ int main() {
     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
     // "points"ファイルからデータを読み込む
-    if (!readDataFromFile("data/points_4", pointsData)) {
+    if (!readDataFromFile("data/points", pointsData)) {
         return 1;
     }
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile("data/U_4", uData)) {
+    if (!readDataFromFile("data/U", uData)) {
         return 1;
     }
 
@@ -79,15 +79,21 @@ int main() {
 
     // 象限ごとに近傍のインデックスを取得する
     vector<size_t> neigbhorIndex(4, 0);
-    double gridX = 2.0;
-    double gridY = 4.0;
+    vector<bool> foundU(4, false);
+    double gridX = -6.0e-4;
+    double gridY = 0.0;
 
-    findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex);
+    findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
     
     // cout << neigbhorIndex[0] << endl;
     // cout << neigbhorIndex[1] << endl;
     // cout << neigbhorIndex[2] << endl;
     // cout << neigbhorIndex[3] << endl;
+
+    cout << foundU[0] << endl;
+    cout << foundU[1] << endl;
+    cout << foundU[2] << endl;
+    cout << foundU[3] << endl;    
 
     DataPoint interpolatedU;
     interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex);

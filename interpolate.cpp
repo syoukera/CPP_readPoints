@@ -7,9 +7,11 @@
 using namespace std;
 
 void findNeighborIndex(double gridX, double gridY, 
-        const vector<DataPoint>& points, vector<size_t>& neighborIndex) {
+    const vector<DataPoint>& points, 
+    vector<size_t>& neighborIndex,
+    vector<bool>& foundU) {
 
-    vector<bool> foundU(4, false);
+    // vector<bool> foundU(4, false);
     vector<double> minDist(4, numeric_limits<double>::max()); // 象限ごとの最小の距離
     
     for (size_t i = 0; i < points.size(); ++i) {
