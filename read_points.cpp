@@ -96,7 +96,7 @@ int main() {
     cout << foundU[3] << endl;    
 
     DataPoint interpolatedU;
-    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex);
+    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU);
 
     cout << interpolatedU.x << endl;
     cout << interpolatedU.y << endl;

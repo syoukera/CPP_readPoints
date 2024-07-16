@@ -84,7 +84,8 @@ void findNeighborIndex(double gridX, double gridY,
 DataPoint interpolatePointBilinear(double gridX, double gridY,
     const std::vector<DataPoint>& points,
     const std::vector<DataPoint>& uData,
-    std::vector<std::size_t>& neighborIndex) {
+    std::vector<std::size_t>& neighborIndex,
+    std::vector<bool>& foundU) {
 
     // 象限のindexからバイリニアのインデックスが異なるので変換している
     // 格子点　points バイリニア:象限, 1:2, 2:3, 3:1, 4:0
@@ -100,12 +101,11 @@ DataPoint interpolatePointBilinear(double gridX, double gridY,
     DataPoint Q12 = uData[neighborIndex[1]];
     DataPoint Q22 = uData[neighborIndex[0]];
 
-    // // 4つのデータ点が見つからない場合のデフォルト値
-    // // 後で実装する
-    // if (!foundU[2]) Q11 = {0, 0, 0};
-    // if (!foundU[3]) Q21 = {0, 0, 0};
-    // if (!foundU[1]) Q12 = {0, 0, 0};
-    // if (!foundU[0]) Q22 = {0, 0, 0};
+    // 4つのデータ点が見つからない場合のデフォルト値
+    if (!foundU[2]) Q11 = {0, 0, 0};
+    if (!foundU[3]) Q21 = {0, 0, 0};
+    if (!foundU[1]) Q12 = {0, 0, 0};
+    if (!foundU[0]) Q22 = {0, 0, 0};
 
     // バイリニア補間の計算
     double denom = (point2.x - point1.x) * (point4.y - point1.y);

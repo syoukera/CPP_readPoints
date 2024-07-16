@@ -14,7 +14,8 @@ void findNeighborIndex(double gridX, double gridY,
 DataPoint interpolatePointBilinear(double gridX, double gridY,
     const std::vector<DataPoint>& points,
     const std::vector<DataPoint>& uData,
-    std::vector<std::size_t>& neighborIndex);
+    std::vector<std::size_t>& neighborIndex,
+    std::vector<bool>& foundU);
 
 DataPoint bilinearInterpolation(
     double gridX, double gridY, 
