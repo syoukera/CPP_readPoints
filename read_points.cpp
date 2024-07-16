@@ -61,6 +61,28 @@ int main() {
         return 1;
     }
 
+    // 円周上の点をpointDataに追加する
+    const int numPointsCircle = 100;
+    const double circleRadious = inletRadious + 1.0e-5; // 0.1 mm outside for inlet
+    
+    // cout << "angle, gridX, gridY" << endl;
+    for (int i = 0; i < numPointsCircle; ++i) {
+
+        double angle = 2.0*M_PI*i/(numPointsCircle); 
+        double gridX = circleRadious*cos(angle);
+        double gridY = circleRadious*sin(angle);
+
+        // cout << angle << " " << gridX << " " << gridY << endl;
+
+        // 円周上の座標をpointsDataに追加
+        DataPoint circlePoint = {gridX, gridY, 0.0};
+        pointsData.push_back(circlePoint);
+
+        // 円周上の流速(0)をuDataに追加
+        DataPoint circleU = {0.0, 0.0, 0.0};
+        uData.push_back(circleU);
+    }
+
     // "U"ファイルからデータを読み込む
     if (!readDataFromFile("data/U", uData)) {
         return 1;
@@ -78,30 +100,33 @@ int main() {
     // cout << uData[3].x << " " << uData[3].y << " " << uData[3].z << endl;
     // cout << uData[4].x << " " << uData[4].y << " " << uData[4].z << endl;
 
-    // // 象限ごとに近傍のインデックスを取得する
-    // vector<size_t> neigbhorIndex(4, 0);
-    // vector<bool> foundU(4, false);
-    // double gridX = 0.0e-4;
-    // double gridY = -6.0e-4;
+    // 象限ごとに近傍のインデックスを取得する
+    vector<size_t> neigbhorIndex(4, 0);
+    vector<bool> foundU(4, false);
+    double gridX = 0.00023;
+    double gridY = 0.00044;
 
-    // findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
-    
-    // cout << neigbhorIndex[0] << endl;
-    // cout << neigbhorIndex[1] << endl;
-    // cout << neigbhorIndex[2] << endl;
-    // cout << neigbhorIndex[3] << endl;
+    findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
 
-    // cout << foundU[0] << endl;
-    // cout << foundU[1] << endl;
-    // cout << foundU[2] << endl;
-    // cout << foundU[3] << endl;    
+    cout << "neighbor index" << endl;
+    cout << neigbhorIndex[0] << endl;
+    cout << neigbhorIndex[1] << endl;
+    cout << neigbhorIndex[2] << endl;
+    cout << neigbhorIndex[3] << endl;
 
-    // DataPoint interpolatedU;
-    // interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
+    cout << "foundU" << endl;
+    cout << foundU[0] << endl;
+    cout << foundU[1] << endl;
+    cout << foundU[2] << endl;
+    cout << foundU[3] << endl;    
 
-    // cout << interpolatedU.x << endl;
-    // cout << interpolatedU.y << endl;
-    // cout << interpolatedU.z << endl;
+    DataPoint interpolatedU;
+    interpolatedU = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
+
+    cout << "calculated velocity" << endl;
+    cout << interpolatedU.x << endl;
+    cout << interpolatedU.y << endl;
+    cout << interpolatedU.z << endl;
 
     // 格子点のXYZ座標を計算
     for (int i = 0; i < GridSize; ++i) {
@@ -114,20 +139,20 @@ int main() {
             // convert range from [0, 1] to [-0.0005, 0.0005]
             gridX = (gridX - 0.5)*0.001;
             gridY = (gridY - 0.5)*0.001;
-            gridZ = (gridZ - 0.5)*0.001;
+            // gridZ = (gridZ - 0.5)*0.001;
 
             DataPoint point = {gridX, gridY, gridZ};
 
             // 格子点に最も近いデータ点の値を代入
             gridPoints[i][j] = point;
 
-            // calclate neighbor index
-            vector<size_t> neigbhorIndex(4, 0);
-            vector<bool> foundU(4, false);
-            findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
+            // // calclate neighbor index
+            // vector<size_t> neigbhorIndex(4, 0);
+            // vector<bool> foundU(4, false);
+            // findNeighborIndex(gridX, gridY, pointsData, neigbhorIndex, foundU);
     
-            // calculate interpolatedU
-            gridU[i][j] = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
+            // // calculate interpolatedU
+            // gridU[i][j] = interpolatePointBilinear(gridX, gridY, pointsData, uData, neigbhorIndex, foundU, inletRadious);
         }
     }
     
@@ -142,10 +167,10 @@ int main() {
     //     return 1;
     // }
 
-    // gridUをファイルに書き込む
-    if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
-        return 1;
-    }
+    // // gridUをファイルに書き込む
+    // if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
+    //     return 1;
+    // }
     
     return 0;
 }
