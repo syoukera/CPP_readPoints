@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <cstdio>
 #include <vector>
 #include <cmath>
@@ -139,10 +140,62 @@ void processFileFromName(const string& pointsFilename,
 int main() {
 
     const string pointsFilename = "data/points";
-    const string inputUFilename = "data/U";
-    const string outputUFilename = "output/U_interpolated";
 
-    processFileFromName(pointsFilename, inputUFilename, outputUFilename);
+    string listFilename = "data/list_foldernames";
+    ifstream listFile(listFilename);
+
+    if (!listFile) {
+        cerr << "ファイルを開けませんでした: " << listFilename << endl;
+        return 0;
+    }
+
+    string filename;
+    int fileIndex = 0;
+
+    while (getline(listFile, filename)) {
+
+        cout << fileIndex << endl;
+
+        string inputUFilename = "/NAS/18/NH3_HiTAC/fuel/" + filename + "/U";
+        cout << inputUFilename << endl;
+
+        // vector<DataPoint> uData;
+        // if (readDataFromFile(filename, uData)) {
+        //     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
+        //     vector<vector<vector<bool>>> foundU(GridSize, vector<vector<bool>>(GridSize, vector<bool>(4, false)));
+
+        //     // バイリニア補間を実行する
+        //     interpolateBilinear(pointsData, uData, gridSpacing, gridU, GridSize, foundU);
+
+        //     // 補間したデータをスペース区切りでテキストファイルに出力
+        //     string outputFilename = "interpolated_data_" + to_string(fileIndex) + ".txt";
+        //     if (!writeDataToFile(outputFilename, gridU)) {
+        //         cerr << "出力ファイルを開けませんでした: " << outputFilename << endl;
+        //     } else {
+        //         cout << "補間データを '" << outputFilename << "' に出力しました。" << endl;
+        //     }
+        //     fileIndex++;
+        // } else {
+        //     cerr << "データを読み込めませんでした: " << filename << endl;
+        // }
+        
+        // 補間したデータをスペース区切りでテキストファイルに出力
+        string outputUFilename = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filename + "/U";
+        cout << outputUFilename << endl;
+        
+        processFileFromName(pointsFilename, inputUFilename, outputUFilename);
+
+        fileIndex++;
+
+        break;
+    }
+
+    listFile.close();
+
+    // const string inputUFilename = "data/U";
+    // const string outputUFilename = "output/U_interpolated";
+
+    // processFileFromName(pointsFilename, inputUFilename, outputUFilename);
 
     return 0;
 }
