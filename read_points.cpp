@@ -45,7 +45,11 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
     return true;
 }
 
-int main() {
+
+// "list_U" ファイルに記載されたすべてのファイルからデータを読み込み、補間処理を実行する関数
+void processFileFromName(const string& pointsFilename, 
+    const string& inputUFilename, const string& outputUFilename) {
+    
     // グリッドの間隔
     const double gridSpacing = 1.0 / 100.0;
     const int GridSize = 101;
@@ -57,13 +61,15 @@ int main() {
     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
     // "points"ファイルからデータを読み込む
-    if (!readDataFromFile("data/points", pointsData)) {
-        return 1;
+    if (!readDataFromFile(pointsFilename, pointsData)) {
+        cerr << "データを読み込めませんでした: " << pointsFilename << endl;
+        // return 1;
     }
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile("data/U", uData)) {
-        return 1;
+    if (!readDataFromFile(inputUFilename, uData)) {
+        cerr << "データを読み込めませんでした: " << inputUFilename << endl;
+        // return 1;
     }
 
     // 円周上の点をpointDataに追加する
@@ -121,9 +127,22 @@ int main() {
     // }
 
     // gridUをファイルに書き込む
-    if (!writeDataToFile("output/U_interpolated", gridU, numPoints, GridSize)) {
-        return 1;
+    if (!writeDataToFile(outputUFilename, gridU, numPoints, GridSize)) {
+        cerr << "データを読み込めませんでした: " << outputUFilename << endl;
+        // return 1;
     }
     
+    // return 0;
+}
+
+
+int main() {
+
+    const string pointsFilename = "data/points";
+    const string inputUFilename = "data/U";
+    const string outputUFilename = "output/U_interpolated";
+
+    processFileFromName(pointsFilename, inputUFilename, outputUFilename);
+
     return 0;
 }
