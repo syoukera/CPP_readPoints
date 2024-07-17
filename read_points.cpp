@@ -48,7 +48,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 
 
 // "list_U" ファイルに記載されたすべてのファイルからデータを読み込み、補間処理を実行する関数
-void processFileFromName(const string& pointsFilename, 
+int processFileFromName(const string& pointsFilename, 
     const string& inputUFilename, const string& outputUFilename) {
     
     // グリッドの間隔
@@ -64,13 +64,13 @@ void processFileFromName(const string& pointsFilename,
     // "points"ファイルからデータを読み込む
     if (!readDataFromFile(pointsFilename, pointsData)) {
         cerr << "データを読み込めませんでした: " << pointsFilename << endl;
-        // return 1;
+        return 1;
     }
 
     // "U"ファイルからデータを読み込む
     if (!readDataFromFile(inputUFilename, uData)) {
         cerr << "データを読み込めませんでした: " << inputUFilename << endl;
-        // return 1;
+        return 1;
     }
 
     // 円周上の点をpointDataに追加する
@@ -124,16 +124,17 @@ void processFileFromName(const string& pointsFilename,
 
     // // gridPointsをファイルに書き込む
     // if (!writeDataToFile("output/X_interpolated", gridPoints, numPoints, GridSize)) {
+    //     cerr << "データを読み込めませんでした: " << "output/X_interpolated" << endl;
     //     return 1;
     // }
 
     // gridUをファイルに書き込む
     if (!writeDataToFile(outputUFilename, gridU, numPoints, GridSize)) {
         cerr << "データを読み込めませんでした: " << outputUFilename << endl;
-        // return 1;
+        return 1;
     }
     
-    // return 0;
+    return 0;
 }
 
 
@@ -156,36 +157,21 @@ int main() {
 
         cout << fileIndex << endl;
 
+        // 読み込む流速データのパス
         string inputUFilename = "/NAS/18/NH3_HiTAC/fuel/" + filename + "/U";
         cout << inputUFilename << endl;
 
-        // vector<DataPoint> uData;
-        // if (readDataFromFile(filename, uData)) {
-        //     vector<vector<DataPoint>> gridU(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
-        //     vector<vector<vector<bool>>> foundU(GridSize, vector<vector<bool>>(GridSize, vector<bool>(4, false)));
-
-        //     // バイリニア補間を実行する
-        //     interpolateBilinear(pointsData, uData, gridSpacing, gridU, GridSize, foundU);
-
-        //     // 補間したデータをスペース区切りでテキストファイルに出力
-        //     string outputFilename = "interpolated_data_" + to_string(fileIndex) + ".txt";
-        //     if (!writeDataToFile(outputFilename, gridU)) {
-        //         cerr << "出力ファイルを開けませんでした: " << outputFilename << endl;
-        //     } else {
-        //         cout << "補間データを '" << outputFilename << "' に出力しました。" << endl;
-        //     }
-        //     fileIndex++;
-        // } else {
-        //     cerr << "データを読み込めませんでした: " << filename << endl;
-        // }
-        
         // 補間したデータをスペース区切りでテキストファイルに出力
         string outputUFilename = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filename + "/U";
         cout << outputUFilename << endl;
-        
-        processFileFromName(pointsFilename, inputUFilename, outputUFilename);
 
-        fileIndex++;
+        // 特定の時刻の流速ファイルについての処理
+        if (!processFileFromName(pointsFilename, inputUFilename, outputUFilename)) {
+            cout << "補間データを '" << outputUFilename << "' に出力しました。" << endl;
+            fileIndex++;
+        } else {
+            cerr << "データを処理できませんでした: " << filename << endl;
+        }
 
         break;
     }
