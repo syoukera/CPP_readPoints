@@ -2,3 +2,5 @@ a.out
 .vscode
 X_interpolated
 U_interpolated
+read_point_icpx
+read_point_gxx
