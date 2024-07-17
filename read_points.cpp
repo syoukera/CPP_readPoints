@@ -6,6 +6,7 @@
 #include <cmath>
 #include <limits>
 #include <filesystem>
+#include <omp.h>
 #include "data_point.h"
 #include "writeData.h"
 #include "interpolate.h"
@@ -47,6 +48,22 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
     return true;
 }
 
+// "list_U" ファイルに記載されたすべてのファイル名をベクターに読み込む関数
+bool readListOfFiles(const string& listFilename, vector<string>& filenames) {
+    ifstream listFile(listFilename);
+    if (!listFile) {
+        cerr << "ファイルを開けませんでした: " << listFilename << endl;
+        return false;
+    }
+
+    string filename;
+    while (getline(listFile, filename)) {
+        filenames.push_back(filename);
+    }
+
+    listFile.close();
+    return true;
+}
 
 // "list_U" ファイルに記載されたすべてのファイルからデータを読み込み、補間処理を実行する関数
 int processFileFromName(const string& pointsFilename, 
@@ -138,32 +155,33 @@ int processFileFromName(const string& pointsFilename,
     return 0;
 }
 
-
 int main() {
 
     const string pointsFilename = "data/points";
 
     string listFilename = "data/list_foldernames";
-    ifstream listFile(listFilename);
 
-    if (!listFile) {
-        cerr << "ファイルを開けませんでした: " << listFilename << endl;
-        return 0;
+    // "list_U" ファイルに記載されたすべてのファイル名をベクターに読み込む
+    vector<string> filenames;
+    if (!readListOfFiles(listFilename, filenames)) {
+        return 1;
     }
 
-    string filename;
+    
     int fileIndex = 0;
 
-    while (getline(listFile, filename)) {
+    // OpenMPによる並列処理
+    #pragma omp parallel for
+    for (size_t i = 0; i < filenames.size(); ++i) {
 
         cout << fileIndex << "/" <<  82433 << endl;
 
         // 読み込む流速データのパス
-        string inputUFilename = "/NAS/18/NH3_HiTAC/fuel/" + filename + "/U";
+        string inputUFilename = "/NAS/18/NH3_HiTAC/fuel/" + filenames[i] + "/U";
         // cout << inputUFilename << endl;
 
         // 補間したデータを出力するフォルダのパス
-        string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filename;
+        string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filenames[i];
         if (!std::filesystem::create_directory(outputUFoldername)) {
             cerr << "フォルダを作成できませんでした: " << outputUFoldername << endl;
         }
@@ -177,13 +195,13 @@ int main() {
             cout << "補間データを '" << outputUFilename << "' に出力しました。" << endl;
             fileIndex++;
         } else {
-            cerr << "データを処理できませんでした: " << filename << endl;
+            cerr << "データを処理できませんでした: " << filenames[i] << endl;
         }
 
         break;
     }
 
-    listFile.close();
+    // listFile.close();
 
     // const string inputUFilename = "data/U";
     // const string outputUFilename = "output/U_interpolated";
