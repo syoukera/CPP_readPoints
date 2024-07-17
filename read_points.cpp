@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <filesystem>
 #include "data_point.h"
 #include "writeData.h"
 #include "interpolate.h"
@@ -155,15 +156,21 @@ int main() {
 
     while (getline(listFile, filename)) {
 
-        cout << fileIndex << endl;
+        cout << fileIndex << "/" <<  82433 << endl;
 
         // 読み込む流速データのパス
         string inputUFilename = "/NAS/18/NH3_HiTAC/fuel/" + filename + "/U";
-        cout << inputUFilename << endl;
+        // cout << inputUFilename << endl;
+
+        // 補間したデータを出力するフォルダのパス
+        string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filename;
+        if (!std::filesystem::create_directory(outputUFoldername)) {
+            cerr << "フォルダを作成できませんでした: " << outputUFoldername << endl;
+        }
 
         // 補間したデータをスペース区切りでテキストファイルに出力
-        string outputUFilename = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + filename + "/U";
-        cout << outputUFilename << endl;
+        string outputUFilename = outputUFoldername + "/U";
+        // cout << outputUFilename << endl;
 
         // 特定の時刻の流速ファイルについての処理
         if (!processFileFromName(pointsFilename, inputUFilename, outputUFilename)) {
