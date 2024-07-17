@@ -171,6 +171,7 @@ int main() {
     int fileIndex = 0;
 
     // OpenMPによる並列処理
+    omp_set_num_threads(16);
     #pragma omp parallel for
     for (size_t i = 0; i < filenames.size(); ++i) {
 
@@ -198,7 +199,7 @@ int main() {
             cerr << "データを処理できませんでした: " << filenames[i] << endl;
         }
 
-        break;
+        // break;
     }
 
     // listFile.close();
