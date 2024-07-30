@@ -1,11 +1,16 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
+#include <iomanip>
+#include <filesystem>
 #include "data_point.h"
+#include "writeData.h"
 using namespace std;
 
 // ファイルからデータを読み込む関数
-bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
+bool readDataFromFile(const string& filename, vector<vector<DataPoint>>& gridData, int GridSize) {
+    
     ifstream infile(filename);
     if (!infile) {
         cerr << "ファイルを開けませんでした: " << filename << endl;
@@ -15,6 +20,7 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
     int num_points;
     string line;
     double x, y, z;
+    vector<DataPoint> data;
 
     // 最初の行をスキップ（ファイルフォーマットによる）
     getline(infile, line);
@@ -37,6 +43,17 @@ bool readDataFromFile(const string& filename, vector<DataPoint>& data) {
 
     // ファイルを閉じる
     infile.close();
+
+    // assign in grid data
+    for (int i = 0; i < GridSize; ++i) {
+        for (int j = 0; j < GridSize; ++j) {
+
+            gridData[i][j] = data[i*GridSize + j];
+            // outfile << "(" << gridData[i][j].x << " " << gridData[i][j].y << " " << gridData[i][j].z << ")" << endl; 
+            // if (j < GridSize - 1) outfile << " "; // 各行の最後にスペースを追加しない
+        }
+    }
+
     return true;
 }
 
@@ -58,27 +75,72 @@ bool readListOfFiles(const string& listFilename, vector<string>& filenames) {
 }
 
 int interpolateUbyTime(double interpTime, string& lowerReference, string& upperReference) {
-    
+
+    double lowerReferenceTime = stod(lowerReference);
+    double upperReferenceTime = stod(upperReference);
+
     // 読み込む流速データのパス
     string lowerReferenceUFilename = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + lowerReference + "/U";
     string upperReferenceUFilename = "/NAS/18/NH3_HiTAC/fuel_Xinterp/" + upperReference + "/U";
-    
-    // 読み込む流速データのvectorを定義する
-    vector<DataPoint> lowerReferenceUData, upperReferenceUData;
+
+    const int GridSize = 101;
+    const int numPoints = GridSize*GridSize;
+
+    // 読み込む流速データのvectorを初期化する
+    vector<vector<DataPoint>> lowerReferenceUData(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
+    vector<vector<DataPoint>> upperReferenceUData(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
+
 
     // "U"ファイルからデータを読み込む
-    if (!readDataFromFile(lowerReferenceUFilename, lowerReferenceUData)) {
+    if (!readDataFromFile(lowerReferenceUFilename, lowerReferenceUData, GridSize)) {
         cerr << "データを読み込めませんでした: " << lowerReferenceUFilename << endl;
         return 1;
     }
-    if (!readDataFromFile(upperReferenceUFilename, upperReferenceUData)) {
+    if (!readDataFromFile(upperReferenceUFilename, upperReferenceUData, GridSize)) {
         cerr << "データを読み込めませんでした: " << upperReferenceUFilename << endl;
         return 1;
     }
 
-    for (size_t i = 0; i < lowerReferenceUData.size(); ++i) {
-        cout << lowerReferenceUData[i].x << " " << upperReferenceUData[i].x << endl;
+    // Define vector for interpolated Velocity
+    vector<vector<DataPoint>> interpUGridData(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
+
+    for (int i = 0; i < GridSize; ++i) {
+        
+        vector<DataPoint> interpUData;
+        for (int j = 0; j < GridSize; ++j) {
+
+            DataPoint interpU = {
+                lowerReferenceUData[i][j].x + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].x - lowerReferenceUData[i][j].x) / (upperReferenceTime - lowerReferenceTime),
+                lowerReferenceUData[i][j].y + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].y - lowerReferenceUData[i][j].y) / (upperReferenceTime - lowerReferenceTime),
+                lowerReferenceUData[i][j].z + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].z - lowerReferenceUData[i][j].z) / (upperReferenceTime - lowerReferenceTime)
+            };
+            interpUGridData[i][j] = interpU;
+            // cout << lowerReferenceUData[i].x << " " << upperReferenceUData[i].x << endl;
+        }
     }
+
+    // set output file name
+    char interpTimeString[10];  // maximum expected length of the float
+    std::snprintf(interpTimeString, 10, "%.7f", interpTime);
+    std::string str(interpTimeString);
+
+    // cout << interpTimeString << endl;
+
+    // 補間したデータを出力するフォルダのパス
+    string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_tinterp/" + std::string(interpTimeString);
+    if (!std::filesystem::create_directory(outputUFoldername)) {
+        cerr << "フォルダを作成できませんでした: " << outputUFoldername << endl;
+    }
+
+    // 補間したデータをスペース区切りでテキストファイルに出力
+    const string outputUFilename = outputUFoldername + "/U";
+    cout << outputUFilename << endl;
+
+    // // gridUをファイルに書き込む
+    // if (!writeDataToFile(outputUFilename, interpUGridData, numPoints, GridSize)) {
+    //     cerr << "データを読み込めませんでした: " << outputUFilename << endl;
+    //     return 1;
+    // }
 
     return 0;
 }
@@ -117,7 +179,16 @@ int main() {
     // for loop for interpolation time step
     for (size_t i = 0; i < listTime.size(); ++i) {
         double interpTime = listTime[i];
-        // cout << interpTime << endl;
+        
+        // std::ostringstream oss;
+        // oss << std::setprecision(10) << interpTime;
+        // std::string interpTimeString = oss.str();
+
+        char interpTimeString[10];  // maximum expected length of the float
+        std::snprintf(interpTimeString, 10, "%.7f", interpTime);
+        std::string str(interpTimeString);
+
+        // cout << interpTimeString << endl;
 
         // for loop for referenced time steps
         for (size_t j = referenceIndex; j < filenames.size(); ++j) {
@@ -134,7 +205,7 @@ int main() {
                 string lowerReference = filenames[j-1];
                 string upperReference = filenames[j];
 
-                // cout << lowerReference << " " << interpTime << " " << upperReference << endl;
+                cout << lowerReference << " " << interpTime << " " << upperReference << endl;
 
                 if (!interpolateUbyTime(interpTime, lowerReference, upperReference)) {
                     cout << "Timedata: " << interpTime << " was interpolated" << endl;
@@ -146,7 +217,7 @@ int main() {
         }
 
     // for development only
-    // break;
+    break;
 
     }
 }
