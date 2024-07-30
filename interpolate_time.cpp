@@ -40,15 +40,40 @@ int main() {
 
     vector<double> listTime;
 
+    // define timesteps for interpolation
     for (int i = 0; i < numTimes; ++i) {
 
         double time = double(i)*deltaTime;
         listTime.push_back(time);
     }
 
-    // for (int i = 0; i < listTime.size(); ++i) {
-    //     cout << listTime[i] << endl;
-    // }
+    // for saving time on reference loop
+    size_t referenceIndex = 0;
 
+    // for loop for interpolation time step
+    for (size_t i = 0; i < listTime.size(); ++i) {
+        double interpTime = listTime[i];
+        // cout << interpTime << endl;
 
+        // for loop for referenced time steps
+        for (size_t j = referenceIndex; j < filenames.size(); ++j) {
+            double referenceTime = stod(filenames[j]);
+            // cout << referenceTime << endl;
+
+            // check upperReference
+            if (referenceTime > interpTime) {
+
+                // save current reference index
+                referenceIndex = j;
+
+                // file name of time for linear interpolation
+                string lowerReference = filenames[j-1];
+                string upperReference = filenames[j];
+
+                cout << lowerReference << " " << interpTime << " " << upperReference << endl;
+
+                break;
+            }
+        }
+    }
 }
