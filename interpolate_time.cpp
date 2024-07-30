@@ -20,6 +20,11 @@ bool readListOfFiles(const string& listFilename, vector<string>& filenames) {
     return true;
 }
 
+int interpolateUbyTime(double interpTime, string& lowerReference, string& upperReference) {
+    return 0;
+}
+
+
 int main() {
 
     string listFilename = "data/list_times";
@@ -70,8 +75,13 @@ int main() {
                 string lowerReference = filenames[j-1];
                 string upperReference = filenames[j];
 
-                cout << lowerReference << " " << interpTime << " " << upperReference << endl;
+                // cout << lowerReference << " " << interpTime << " " << upperReference << endl;
 
+                if (!interpolateUbyTime(interpTime, lowerReference, upperReference)) {
+                    cout << "Timedata: " << interpTime << " was interpolated" << endl;
+                } else {
+                    cerr << "Timedata: " << interpTime << " can't be interpolated" << endl;
+                }
                 break;
             }
         }
