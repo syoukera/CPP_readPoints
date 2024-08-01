@@ -101,21 +101,54 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
         return 1;
     }
 
-    // Define vector for interpolated Velocity
+    // Define 2D-vector for interpolated Velocity
     vector<vector<DataPoint>> interpUGridData(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
 
-    for (int i = 0; i < GridSize; ++i) {
-        
-        vector<DataPoint> interpUData;
-        for (int j = 0; j < GridSize; ++j) {
+    for (size_t i = 0; i < GridSize; ++i) {
+        for (size_t j = 0; j < GridSize; ++j) {
 
+            // linear interpolation by time
             DataPoint interpU = {
                 lowerReferenceUData[i][j].x + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].x - lowerReferenceUData[i][j].x) / (upperReferenceTime - lowerReferenceTime),
                 lowerReferenceUData[i][j].y + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].y - lowerReferenceUData[i][j].y) / (upperReferenceTime - lowerReferenceTime),
                 lowerReferenceUData[i][j].z + (interpTime - lowerReferenceTime)*(upperReferenceUData[i][j].z - lowerReferenceUData[i][j].z) / (upperReferenceTime - lowerReferenceTime)
             };
+
+            // assign interpolated velocity on 2D-vector
             interpUGridData[i][j] = interpU;
             // cout << lowerReferenceUData[i].x << " " << upperReferenceUData[i].x << endl;
+        }
+    }
+
+    // Define 2D-vector for velocity on stagard grid
+    vector<vector<DataPoint>> stagardUGridData(GridSize, vector<DataPoint>(GridSize, {0.0f, 0.0f, 0.0f}));
+
+    size_t i1, j1;
+
+    for (size_t i = 0; i < GridSize; ++i) {
+        for (size_t j = 0; j < GridSize; ++j) {
+
+            if (i < GridSize-1) {
+                i1 = i + 1; // inner grid points
+            } else {
+                i1 = i; // upper boundary on x
+            }
+            
+            if (j < GridSize-1) {
+                j1 = j + 1;  // inner grid points
+            } else {
+                j1 = j; // upper boundary on y
+            }
+
+            // get velocity for stagard grid
+            DataPoint stagardU = {
+                0.5*(interpUGridData[i][j].x + interpUGridData[i1][j].x), // mean value of i and i+1 pints
+                0.5*(interpUGridData[i][j].y + interpUGridData[i][j1].y), // mean value of j and j+1 pints
+                interpUGridData[i][j].z                                  // same as interpolated velocity
+            };
+            
+            // assign stagard velocity on 2D-vector
+            stagardUGridData[i][j] = stagardU;
         }
     }
 
@@ -134,10 +167,10 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
 
     // 補間したデータをスペース区切りでテキストファイルに出力
     const string outputUFilename = outputUFoldername + "/U";
-    cout << outputUFilename << endl;
+    cout << outputUFilename << " was exported from " << lowerReference << " and " << upperReference << endl;
 
     // gridUをファイルに書き込む
-    if (!writeDataToFile(outputUFilename, interpUGridData, numPoints, GridSize)) {
+    if (!writeDataToFile(outputUFilename, stagardUGridData, numPoints, GridSize)) {
         cerr << "データを読み込めませんでした: " << outputUFilename << endl;
         return 1;
     }    
@@ -205,19 +238,23 @@ int main() {
                 string lowerReference = filenames[j-1];
                 string upperReference = filenames[j];
 
-                cout << lowerReference << " " << interpTime << " " << upperReference << endl;
+                // cout << lowerReference << " " << interpTime << " " << upperReference << endl;
 
                 if (!interpolateUbyTime(interpTime, lowerReference, upperReference)) {
-                    cout << "Timedata: " << interpTime << " was interpolated" << endl;
+                    // cout << "Timedata: " << interpTime << " was interpolated from " << lowerReference << " and " << upperReference << endl;
                 } else {
                     cerr << "Timedata: " << interpTime << " can't be interpolated" << endl;
                 }
+
+                // break when interpolation was done
                 break;
             }
         }
 
-    // for development only
-    break;
+        // for checking first 100 step
+        if (i > 100) {
+            break;
+        }
 
     }
 }
