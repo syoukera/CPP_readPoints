@@ -5,4 +5,5 @@
 # icpx read_points.cpp interpolate.cpp writeData.cpp -o read_point_icpx -qopenmp
 
 # for time interpolation
-g++ interpolate_time.cpp writeData.cpp
+# g++ interpolate_time.cpp writeData.cpp -o tinterp_gxx
+icpx interpolate_time.cpp writeData.cpp -o tinterp_icpx -qopenmp

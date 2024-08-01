@@ -4,6 +4,8 @@
 #include <vector>
 #include <iomanip>
 #include <filesystem>
+#include <time.h>
+#include <omp.h>
 #include "data_point.h"
 #include "writeData.h"
 using namespace std;
@@ -209,8 +211,16 @@ int main() {
     // for saving time on reference loop
     size_t referenceIndex = 0;
 
+    // get start time for loop
+    clock_t start = clock();
+    
+    // OpenMPによる並列処理
+    omp_set_num_threads(16);
+    #pragma omp parallel for
+
     // for loop for interpolation time step
-    for (size_t i = 0; i < listTime.size(); ++i) {
+    // for (size_t i = 0; i < listTime.size(); ++i) {
+    for (size_t i = 0; i < 100; ++i) {
         double interpTime = listTime[i];
         
         // std::ostringstream oss;
@@ -251,10 +261,16 @@ int main() {
             }
         }
 
-        // for checking first 100 step
-        if (i > 100) {
-            break;
-        }
-
+        // // for checking first 100 step
+        // if (i > 100) {
+        //     break;
+        // }
     }
+
+    clock_t end = clock();
+    const double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
+
+    cout << "Time for loop: " << time << " [ms]" << endl;
+
+    return 0;
 }
