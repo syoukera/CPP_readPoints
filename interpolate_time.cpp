@@ -136,11 +136,11 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
     const string outputUFilename = outputUFoldername + "/U";
     cout << outputUFilename << endl;
 
-    // // gridUをファイルに書き込む
-    // if (!writeDataToFile(outputUFilename, interpUGridData, numPoints, GridSize)) {
-    //     cerr << "データを読み込めませんでした: " << outputUFilename << endl;
-    //     return 1;
-    // }
+    // gridUをファイルに書き込む
+    if (!writeDataToFile(outputUFilename, interpUGridData, numPoints, GridSize)) {
+        cerr << "データを読み込めませんでした: " << outputUFilename << endl;
+        return 1;
+    }    
 
     return 0;
 }

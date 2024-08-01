@@ -1,4 +1,8 @@
 #!/bin/bash
 
+# for space interpolation
 # g++ read_points.cpp interpolate.cpp writeData.cpp -o read_point_gxx
-icpx read_points.cpp interpolate.cpp writeData.cpp -o read_point_icpx -qopenmp
+# icpx read_points.cpp interpolate.cpp writeData.cpp -o read_point_icpx -qopenmp
+
+# for time interpolation
+g++ interpolate_time.cpp writeData.cpp
