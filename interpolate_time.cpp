@@ -165,6 +165,7 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
     // 補間したデータを出力するフォルダのパス
     // string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_tinterp/" + std::string(interpTimeString);
     string outputUFoldername = "/home/syoukera/fuel_tinterp/" + std::string(interpTimeString);
+    // string outputUFoldername = "/NAS/18/NH3_HiTAC/20240709_interpolate/output/" + std::string(interpTimeString);
     if (!std::filesystem::create_directory(outputUFoldername)) {
         cerr << "フォルダを作成できませんでした: " << outputUFoldername << endl;
     }

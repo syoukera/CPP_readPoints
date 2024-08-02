@@ -1,6 +1,7 @@
 #include "writeData.h"
 #include <fstream>
 #include <iostream>
+#include <iomanip> // for std::setprecision
 
 using namespace std;
 
@@ -17,6 +18,9 @@ bool writeDataToFile(const string& filename, vector<vector<DataPoint>>& gridData
     outfile << endl;
     outfile << numPoints << endl;
     outfile << "(" << endl;
+
+    // 小数点以下5桁の精度で固定小数点形式を使用
+    outfile << fixed << setprecision(7);
     
     for (int i = 0; i < GridSize; ++i) {
         for (int j = 0; j < GridSize; ++j) {
