@@ -5,7 +5,8 @@
 #include <iomanip>
 #include <filesystem>
 #include <time.h>
-#include <omp.h>
+// #include <omp.h>
+#include "mpi.h"
 #include "data_point.h"
 #include "writeData.h"
 using namespace std;
@@ -162,7 +163,8 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
     // cout << interpTimeString << endl;
 
     // 補間したデータを出力するフォルダのパス
-    string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_tinterp/" + std::string(interpTimeString);
+    // string outputUFoldername = "/NAS/18/NH3_HiTAC/fuel_tinterp/" + std::string(interpTimeString);
+    string outputUFoldername = "/home/syoukera/fuel_tinterp/" + std::string(interpTimeString);
     if (!std::filesystem::create_directory(outputUFoldername)) {
         cerr << "フォルダを作成できませんでした: " << outputUFoldername << endl;
     }
@@ -181,7 +183,18 @@ int interpolateUbyTime(double interpTime, string& lowerReference, string& upperR
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    // int myid, procs;
+    // double myval, val;
+    // MPI_Status status;
+    // FILE *fp;
+
+    // MPI_Init(&argc, &argv);
+    // MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    // MPI_Comm_size(MPI_COMM_WORLD, &procs);
+
+    // cout << myid << " " << procs << endl;
 
     string listFilename = "data/list_times";
     
@@ -214,13 +227,18 @@ int main() {
     // get start time for loop
     clock_t start = clock();
     
-    // OpenMPによる並列処理
-    omp_set_num_threads(16);
-    #pragma omp parallel for
+    // // OpenMPによる並列処理
+    // omp_set_num_threads(16);
+    // #pragma omp parallel for
+
+    // caluclate division of each roop
+    // const int numInterpTotal = numTimes;
+    // const int numInterpTotal = 124;
 
     // for loop for interpolation time step
-    // for (size_t i = 0; i < listTime.size(); ++i) {
-    for (size_t i = 0; i < 100; ++i) {
+    for (size_t i = 0; i < listTime.size(); ++i) {
+    // for (size_t i = 0; i < 124; ++i) {
+    // for (size_t i = myid; i < numInterpTotal; i+=procs) {
         double interpTime = listTime[i];
         
         // std::ostringstream oss;
@@ -266,6 +284,8 @@ int main() {
         //     break;
         // }
     }
+    
+    // MPI_Finalize();
 
     clock_t end = clock();
     const double time = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000.0;
