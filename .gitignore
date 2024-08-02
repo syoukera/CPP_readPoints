@@ -7,3 +7,4 @@ read_point_gxx
 tinterp_icpx
 tinterp_gxx
 tinterp_mpiicpc
+load_data_gfortran
