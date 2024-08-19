@@ -104,6 +104,8 @@ program read_vectors
     integer :: jinlet
     integer, parameter :: kinlet = (grid_size - 1)/2.0 + 1 ! fix reference point of z index on import velocity as center line
 
+    double precision dum_rin
+
     allocate (u(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (w(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
@@ -118,11 +120,13 @@ program read_vectors
             ! for loop inside on upper boundery of x
             do i = ista, ista - ibd , -1
 
-                ! calclate first row, and later copy it
-                if (i == ista) then
                     
-                    ! check if y is insile of inlet
-                    if (jinlet_sta <= j .and. j <= jinlet_end) then
+                ! check if y is insile of inlet
+                if (jinlet_sta <= j .and. j <= jinlet_end) then
+
+                    
+                    ! calclate first row, and later copy it
+                    if (i == ista) then
 
                         ! get j-index as origin to be inlet start
                         jinlet = j - (jinlet_sta - 1)
@@ -131,14 +135,23 @@ program read_vectors
                         u(i, j, k) = gridData(kinlet, jinlet, 3) ! z-direction of import velocity
                         v(i, j, k) = gridData(kinlet, jinlet, 2) ! y-direction of import velocity
                         w(i, j, k) = gridData(kinlet, jinlet, 1) ! x-direction of import velocity
+                    
+                    else ! inside of second layer of boundary
 
-                    else
-                        ! set surrounding velocity
-                        u(i, j, k) = u1
+                        ! set same velocity as first row
+                        u(i, j, k) = u(ista, j, k)
+                        v(i, j, k) = v(ista, j, k)
+                        w(i, j, k) = w(ista, j, k)
+
                     endif
-                else 
-                    ! set same velocity as first row
-                    u(i, j, k) = u(ista, j, k)
+
+                else ! outside of inlet radious
+
+                    ! set surrounding velocity
+                    u(i, j, k) = u1
+                    v(i, j, k) = 0.0d0
+                    w(i, j, k) = 0.0d0
+
                 endif
 
             end do
