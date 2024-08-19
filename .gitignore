@@ -10,3 +10,4 @@ tinterp_mpiicpc
 load_data_gfortran
 asigned_U
 loaded_U
+*.mod

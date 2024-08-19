@@ -19,17 +19,33 @@ module parameters
 
 end module parameters
 
-subroutine load_U()
+subroutine load_U(index_time)
     use parameters
     implicit none
+
+    integer, intent(in) :: index_time
+    double precision, parameter :: dt = 1d-7
+    double precision :: time
 
     integer :: n, i, j
     double precision :: x, y, z
     
     character(len=100) :: line, clean_line
+    character(len=9) :: name_folder
+    character(len=100) :: path_folder
+
+    ! convert to real
+    time = index_time - 1
+    time = time*1d-7
+
+    ! convert to character
+    write(name_folder, "(F9.7)") time
+    path_folder = '/NAS/18/NH3_HiTAC/velocity_interpolate/fuel_tinterp//'//name_folder//'/U'
+    print *, path_folder, ' will be loaded.'
 
     ! Open the file
-    open(unit=10, file='output/0.0000000/U', status='old', action='read')
+    open(unit=10, file=path_folder, status='old', action='read')
+    ! open(unit=10, file='output/0.0000000/U', status='old', action='read')
     
     ! Read the number of vectors
     read(10, *) n
@@ -80,6 +96,8 @@ program read_vectors
 
     integer :: n, i, j, k
 
+    integer, parameter :: index_time = 2382
+
     integer, parameter :: jinlet_center = ny/2.0;
     integer, parameter :: jinlet_sta = jinlet_center - (grid_size - 1)/2.0
     integer, parameter :: jinlet_end = jinlet_center + (grid_size - 1)/2.0
@@ -90,7 +108,7 @@ program read_vectors
     allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (w(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
 
-    call load_U()
+    call load_U(index_time)
 
     ! Asign velocities
     ! for loop among z and y range 
