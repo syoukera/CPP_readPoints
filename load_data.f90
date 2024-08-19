@@ -2,7 +2,7 @@ program read_vectors
     implicit none
     integer :: n, i, j, k
     double precision :: x, y, z
-    character(len=100) :: line
+    character(len=100) :: line, clean_line
     character(len=1) :: paren
 
     integer, parameter :: grid_size = 101
@@ -45,8 +45,17 @@ program read_vectors
     do i = 1, grid_size
         do j = 1, grid_size
             read(10, '(A)') line  ! Read the line into a string
-            read(line, '(A1, F9.7, 1X, F9.7, 1X, F9.7, A1)') paren, x, y, z, paren  ! Parse the string
+
+            ! read(line, '(A1, F12.7, 1X, F12.7, 1X, F12.7, A1)') paren, x, y, z, paren  ! Parse the string
             ! print *, 'Vector ', i, ", ", j, ': ', x, y, z
+
+            ! Remove the parentheses
+            clean_line = adjustl(line)
+            clean_line = clean_line(2:)   ! Remove the first character "("
+            clean_line = clean_line(:len_trim(clean_line)-1)  ! Remove the last character ")"
+
+            ! Read the components from the cleaned line
+            read(clean_line, *) x, y, z
 
             gridData(i, j, 1) = x
             gridData(i, j, 2) = y
