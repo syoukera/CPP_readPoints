@@ -12,32 +12,22 @@ module parameters
     double precision, parameter :: u1 = 1.0 ! air velocity [cm/s]
     double precision, allocatable, save :: u(:,:,:), v(:,:,:), w(:,:,:)
 
-end module parameters
-
-program read_vectors
-    use parameters
-    implicit none
-
-    integer :: n, i, j, k
-    double precision :: x, y, z
-    character(len=100) :: line, clean_line
-    character(len=1) :: paren
-
+    ! parameter for load data
     integer, parameter :: grid_size = 101
     integer, parameter :: total_grid_size = grid_size*grid_size
     double precision, dimension(grid_size, grid_size, 3) :: gridData
 
+end module parameters
 
-    integer, parameter :: jinlet_center = ny/2.0;
-    integer, parameter :: jinlet_sta = jinlet_center - (grid_size - 1)/2.0
-    integer, parameter :: jinlet_end = jinlet_center + (grid_size - 1)/2.0
-    integer :: jinlet
-    integer, parameter :: kinlet = (grid_size - 1)/2.0 + 1 ! fix reference point of z index on import velocity as center line
+subroutine load_U()
+    use parameters
+    implicit none
 
-    allocate (u(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
-    allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
-    allocate (w(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
+    integer :: n, i, j
+    double precision :: x, y, z
     
+    character(len=100) :: line, clean_line
+
     ! Open the file
     open(unit=10, file='output/0.0000000/U', status='old', action='read')
     
@@ -52,9 +42,6 @@ program read_vectors
     do i = 1, grid_size
         do j = 1, grid_size
             read(10, '(A)') line  ! Read the line into a string
-
-            ! read(line, '(A1, F12.7, 1X, F12.7, 1X, F12.7, A1)') paren, x, y, z, paren  ! Parse the string
-            ! print *, 'Vector ', i, ", ", j, ': ', x, y, z
 
             ! Remove the parentheses
             clean_line = adjustl(line)
@@ -81,13 +68,29 @@ program read_vectors
 
         write (12, *) (gridData(i, j, 3), j = 1, grid_size)
 
-        ! do j = 1, grid_size
-        !     print *, 'Vector ', i, ", ", j, ': ', gridData(i, j, 1), gridData(i, j, 2), gridData(i, j, 3)
-        ! end do
-
     end do
     
     close(12)
+
+end subroutine load_U
+
+program read_vectors
+    use parameters
+    implicit none
+
+    integer :: n, i, j, k
+
+    integer, parameter :: jinlet_center = ny/2.0;
+    integer, parameter :: jinlet_sta = jinlet_center - (grid_size - 1)/2.0
+    integer, parameter :: jinlet_end = jinlet_center + (grid_size - 1)/2.0
+    integer :: jinlet
+    integer, parameter :: kinlet = (grid_size - 1)/2.0 + 1 ! fix reference point of z index on import velocity as center line
+
+    allocate (u(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
+    allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
+    allocate (w(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
+
+    call load_U()
 
     ! Asign velocities
     ! for loop among z and y range 
@@ -124,7 +127,6 @@ program read_vectors
         end do
     end do
 
-    
     ! Open the file
     open(unit=11, file='output/asigned_U', status='replace', action='write')
 
