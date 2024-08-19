@@ -54,16 +54,24 @@ program read_vectors
         end do
     end do
 
+    ! Close the file
+    close(10)
+
+    ! Open the file
+    open(unit=12, file='output/loaded_U', status='replace', action='write')
     
-    ! Read each vector
+    ! Print each vector
     do i = 1, grid_size
-        do j = 1, grid_size
 
-            print *, 'Vector ', i, ", ", j, ': ', gridData(i, j, 1), gridData(i, j, 2), gridData(i, j, 3)
+        write (12, *) (gridData(i, j, 3), j = 1, grid_size)
 
-        end do
+        ! do j = 1, grid_size
+        !     print *, 'Vector ', i, ", ", j, ': ', gridData(i, j, 1), gridData(i, j, 2), gridData(i, j, 3)
+        ! end do
+
     end do
-
+    
+    close(12)
 
     ! Asign velocities
     ! for loop among z and y range 
@@ -100,8 +108,19 @@ program read_vectors
         end do
     end do
 
-    ! Close the file
-    close(10)
     
+    ! Open the file
+    open(unit=11, file='output/asigned_U', status='replace', action='write')
+
+    i = ista ! set x as first layer on boundary
+
+    do k = ksta - kbd, kend + kbd
+
+        write(11, *) (u(i, j, k), j = jsta - jbd, jend + jbd)
+
+    end do
+
+    close(11)
+
 end program read_vectors
   
