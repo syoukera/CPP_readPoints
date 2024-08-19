@@ -1,5 +1,23 @@
-program read_vectors
+module parameters
     implicit none
+
+    ! parameter of FK3 grid
+    integer, parameter :: nx = 2000, ny = 1100, nz = 1, ibd = 4, jbd = 4, kbd = 4
+    
+    ! assume no mpi
+    integer, parameter :: ista = 1, iend = nx
+    integer, parameter :: jsta = 1, jend = ny
+    integer, parameter :: ksta = 1, kend = nz
+
+    double precision, parameter :: u1 = 1.0 ! air velocity [cm/s]
+    double precision, allocatable, save :: u(:,:,:), v(:,:,:), w(:,:,:)
+
+end module parameters
+
+program read_vectors
+    use parameters
+    implicit none
+
     integer :: n, i, j, k
     double precision :: x, y, z
     character(len=100) :: line, clean_line
@@ -9,23 +27,12 @@ program read_vectors
     integer, parameter :: total_grid_size = grid_size*grid_size
     double precision, dimension(grid_size, grid_size, 3) :: gridData
 
-    ! parameter of FK3 grid
-    integer, parameter :: nx = 2000, ny = 1100, nz = 1, ibd = 4, jbd = 4, kbd = 4
 
     integer, parameter :: jinlet_center = ny/2.0;
     integer, parameter :: jinlet_sta = jinlet_center - (grid_size - 1)/2.0
     integer, parameter :: jinlet_end = jinlet_center + (grid_size - 1)/2.0
     integer :: jinlet
     integer, parameter :: kinlet = (grid_size - 1)/2.0 + 1 ! fix reference point of z index on import velocity as center line
-
-    ! assume no mpi
-    integer, parameter :: ista = 1, iend = nx
-    integer, parameter :: jsta = 1, jend = ny
-    integer, parameter :: ksta = 1, kend = nz
-
-    double precision, parameter :: u1 = 1.0 ! air velocity [cm/s]
-
-    double precision, allocatable, save :: u(:,:,:), v(:,:,:), w(:,:,:)
 
     allocate (u(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
