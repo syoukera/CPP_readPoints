@@ -2,7 +2,7 @@ module parameters
     implicit none
 
     ! parameter of FK3 grid
-    integer, parameter :: nx = 2000, ny = 1100, nz = 1, ibd = 4, jbd = 4, kbd = 4
+    integer, parameter :: nx = 2000, ny = 1100, nz = 1100, ibd = 4, jbd = 4, kbd = 4
     
     ! assume no mpi
     integer, parameter :: ista = 1, iend = nx
@@ -14,8 +14,7 @@ module parameters
 
     ! parameter for load data
     integer, parameter :: grid_size = 101
-    integer, parameter :: total_grid_size = grid_size*grid_size
-    double precision, dimension(grid_size, grid_size, 3) :: gridData
+    double precision, dimension(grid_size, grid_size, 3) :: inlet_velocities
 
 end module parameters
 
@@ -67,9 +66,9 @@ subroutine load_U(index_time)
             ! Read the components from the cleaned line
             read(clean_line, *) x, y, z
 
-            gridData(i, j, 1) = x
-            gridData(i, j, 2) = y
-            gridData(i, j, 3) = z
+            inlet_velocities(i, j, 1) = x
+            inlet_velocities(i, j, 2) = y
+            inlet_velocities(i, j, 3) = z
         end do
     end do
 
@@ -82,7 +81,7 @@ subroutine load_U(index_time)
     ! Print each vector
     do i = 1, grid_size
 
-        write (12, *) (gridData(i, j, 3), j = 1, grid_size)
+        write (12, *) (inlet_velocities(i, j, 3), j = 1, grid_size)
 
     end do
     
@@ -96,13 +95,17 @@ program read_vectors
 
     integer :: n, i, j, k
 
-    integer, parameter :: index_time = 2382
+    integer, parameter :: index_time = 1
 
     integer, parameter :: jinlet_center = ny/2.0;
     integer, parameter :: jinlet_sta = jinlet_center - (grid_size - 1)/2.0
     integer, parameter :: jinlet_end = jinlet_center + (grid_size - 1)/2.0
     integer :: jinlet
-    integer, parameter :: kinlet = (grid_size - 1)/2.0 + 1 ! fix reference point of z index on import velocity as center line
+    
+    integer, parameter :: kinlet_center = nz/2.0;
+    integer, parameter :: kinlet_sta = kinlet_center - (grid_size - 1)/2.0
+    integer, parameter :: kinlet_end = kinlet_center + (grid_size - 1)/2.0
+    integer :: kinlet
 
     double precision dum_rin
 
@@ -120,32 +123,44 @@ program read_vectors
             ! for loop inside on upper boundery of x
             do i = ista, ista - ibd , -1
 
-                    
                 ! check if y is insile of inlet
                 if (jinlet_sta <= j .and. j <= jinlet_end) then
+                    ! check if z is insile of inlet
+                    if (kinlet_sta <= k .and. k <= kinlet_end) then
 
-                    
-                    ! calclate first row, and later copy it
-                    if (i == ista) then
+                        ! calclate first row, and later copy it
+                        if (i == ista) then
 
-                        ! get j-index as origin to be inlet start
-                        jinlet = j - (jinlet_sta - 1)
+                            ! get j-index as origin to be inlet start
+                            jinlet = j - (jinlet_sta - 1)
+                            
+                            ! get k-index as origin to be inlet start
+                            kinlet = k - (kinlet_sta - 1)
 
-                        ! grid data is (z, y, x) cordinate
-                        u(i, j, k) = gridData(kinlet, jinlet, 3) ! z-direction of import velocity
-                        v(i, j, k) = gridData(kinlet, jinlet, 2) ! y-direction of import velocity
-                        w(i, j, k) = gridData(kinlet, jinlet, 1) ! x-direction of import velocity
-                    
-                    else ! inside of second layer of boundary
+                            ! grid data is (z, y, x) cordinate
+                            u(i, j, k) = inlet_velocities(kinlet, jinlet, 3) ! z-direction of import velocity
+                            v(i, j, k) = inlet_velocities(kinlet, jinlet, 2) ! y-direction of import velocity
+                            w(i, j, k) = inlet_velocities(kinlet, jinlet, 1) ! x-direction of import velocity
+                        
+                        else ! inside of second layer of boundary
 
-                        ! set same velocity as first row
-                        u(i, j, k) = u(ista, j, k)
-                        v(i, j, k) = v(ista, j, k)
-                        w(i, j, k) = w(ista, j, k)
+                            ! set same velocity as first row
+                            u(i, j, k) = u(ista, j, k)
+                            v(i, j, k) = v(ista, j, k)
+                            w(i, j, k) = w(ista, j, k)
 
+                        endif
+
+                    else ! z is outside of inlet radious
+    
+                        ! set surrounding velocity
+                        u(i, j, k) = u1
+                        v(i, j, k) = 0.0d0
+                        w(i, j, k) = 0.0d0
+    
                     endif
 
-                else ! outside of inlet radious
+                else ! y is outside of inlet radious
 
                     ! set surrounding velocity
                     u(i, j, k) = u1
