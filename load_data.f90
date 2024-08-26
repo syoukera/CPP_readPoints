@@ -2,7 +2,7 @@ module parameters
     implicit none
 
     ! parameter of FK3 grid
-    integer, parameter :: nx = 2000, ny = 1100, nz = 1100, ibd = 4, jbd = 4, kbd = 4
+    integer, parameter :: nx = 1, ny = 1100, nz = 1100, ibd = 4, jbd = 4, kbd = 4
     
     ! assume no mpi
     integer, parameter :: ista = 1, iend = nx
@@ -107,8 +107,6 @@ program read_vectors
     integer, parameter :: kinlet_end = kinlet_center + (grid_size - 1)/2.0
     integer :: kinlet
 
-    double precision dum_rin
-
     allocate (u(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (v(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
     allocate (w(ista-ibd:iend+ibd,jsta-jbd:jend+jbd,ksta-kbd:kend+kbd))
@@ -137,12 +135,24 @@ program read_vectors
                             ! get k-index as origin to be inlet start
                             kinlet = k - (kinlet_sta - 1)
 
-                            ! grid data is (z, y, x) cordinate
-                            u(i, j, k) = inlet_velocities(kinlet, jinlet, 3) ! z-direction of import velocity
-                            v(i, j, k) = inlet_velocities(kinlet, jinlet, 2) ! y-direction of import velocity
-                            w(i, j, k) = inlet_velocities(kinlet, jinlet, 1) ! x-direction of import velocity
+                            ! if non-zero z velocity
+                            if (inlet_velocities(kinlet, jinlet, 3) .ne. 0.0d0) then
+
+                                ! grid data is (z, y, x) cordinate
+                                u(i, j, k) = inlet_velocities(kinlet, jinlet, 3) ! z-direction of import velocity
+                                v(i, j, k) = inlet_velocities(kinlet, jinlet, 2) ! y-direction of import velocity
+                                w(i, j, k) = inlet_velocities(kinlet, jinlet, 1) ! x-direction of import velocity
+                            
+                            else ! if loaded velocity is 0.0 
+
+                                ! set surrounding velocity
+                                u(i, j, k) = u1
+                                v(i, j, k) = 0.0d0
+                                w(i, j, k) = 0.0d0
+
+                            endif
                         
-                        else ! inside of second layer of boundary
+                        else ! inside of second layer of x-boundary
 
                             ! set same velocity as first row
                             u(i, j, k) = u(ista, j, k)
